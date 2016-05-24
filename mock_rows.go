@@ -24,7 +24,7 @@ func (rs *MockRows) Next() bool {
 	return false
 }
 
-func (rs *MockRows) Scan(dest ...interface{}) error {
+func (rs *MockRows) Scan(dest ...driver.Value) error {
 	for i, sv := range rs.lastcols {
 		err := convertAssign(dest[i], sv)
 		if err != nil {

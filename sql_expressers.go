@@ -28,9 +28,22 @@ func (s groupBy) ToSql() string {
 
 func (s where) ToSql() string {
 	if s.expression != "" {
-		return fmt.Sprintf("WHERE %v", s)
+		return fmt.Sprintf("%v", s)
 	}
 	return ""
+}
+
+func (s wheres) ToSql() string {
+	if len(s) == 0 {
+		return ""
+	}
+
+	str := make([]string, len(s))
+
+	for i, expr := range s {
+		str[i] = expr.ToSql()
+	}
+	return "\t" + strings.Join(str, "\n\t")
 }
 
 func (s join) ToSql() string {
@@ -78,7 +91,7 @@ func (exp selects) ToSql() string {
 
 func (q Query) ToSql() string {
 	fields := []SqlExpresser{q.selectOption, q.selects,
-		q.from, q.joins, q.where, q.groupBy, q.having, q.orderBy, q.limit}
+		q.from, q.joins, q.wheres, q.groupBy, q.having, q.orderBy, q.limit}
 
 	sql := ""
 	for _, exp := range fields {

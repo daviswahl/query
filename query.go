@@ -21,11 +21,6 @@ type (
 	selects []SelectExpression
 )
 
-type where struct {
-	expression string
-	args       []interface{}
-}
-
 type SelectExpression struct {
 	expression string
 	scanner    driver.Value
@@ -36,7 +31,7 @@ type Query struct {
 	selects      selects
 	from         from
 	joins        joins
-	where        where
+	wheres       wheres
 	groupBy      groupBy
 	having       having
 	orderBy      orderBy
@@ -72,6 +67,7 @@ func (q Query) From(s string) Query {
 func (q Query) LeftJoin(s string) Query {
 	return q.Join("LEFT JOIN " + s)
 }
+
 func (q Query) Join(s string) Query {
 	q.joins = append(q.joins, join(s))
 	return q
@@ -108,14 +104,27 @@ func (q Query) Select(s string, T driver.Value, key ...interface{}) Query {
 	return q
 }
 
+type where struct {
+	expression string
+	args       []interface{}
+}
+
 func Where(s string, T ...interface{}) (where, error) {
 	return where{s, T}, nil
 }
 
-func (q Query) Scanners() []interface{} {
-	v := make([]interface{}, 0)
-	for _, s := range q.selects {
-		v = append(v, s.scanner)
+func (q Query) Args() []driver.Value {
+	//q.wheres
+	return nil
+}
+func (q Query) Where(s string, args ...driver.Value) Query {
+	return q
+}
+
+func (q Query) Scanners() []driver.Value {
+	v := make([]driver.Value, len(q.selects))
+	for i, s := range q.selects {
+		v[i] = s.scanner
 	}
 	return v
 }

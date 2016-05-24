@@ -36,6 +36,7 @@ func TestScanners(t *testing.T) {
 	f.Cols = values
 	i := 0
 	for f.Next() {
+		q.Scanners()
 		f.Scan(q.Scanners()...)
 		assert.SqlNullEq(t, values[i][0], q.Scanners()[0])
 		assert.SqlNullEq(t, values[i][1], q.Scanners()[1])
@@ -53,6 +54,16 @@ func TestWhere(t *testing.T) {
 	w, _ := Where("WHERE BATS IN (?,?)", "foo", "bar")
 	exp := []string{"foo", "bar"}
 	for i, v := range w.args {
+		assert.Eq(t, "", exp[i], v)
+	}
+}
+
+func TestQueryWhere(t *testing.T) {
+	q := New().Select("*", []driver.Value{}, "foo").
+		Where("foo = ?", "bar").
+		Where("qux IN (?, ?)", 12, 14)
+	exp := []driver.Value{"bar", 12, 14}
+	for i, v := range q.Args() {
 		assert.Eq(t, "", exp[i], v)
 	}
 }
